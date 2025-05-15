@@ -244,7 +244,9 @@ interface FinancialRecordsContextType {
 }
 
 // 1. Create the context
-const FinancialRecordContext = createContext<FinancialRecordsContextType | undefined>(undefined);
+const FinancialRecordContext = createContext<
+  FinancialRecordsContextType | undefined
+>(undefined);
 
 // 2. Create the provider
 function FinancialRecordsProvider({ children }: { children: React.ReactNode }) {
@@ -257,7 +259,7 @@ function FinancialRecordsProvider({ children }: { children: React.ReactNode }) {
 
       try {
         const response = await fetch(
-          `http://localhost:3001/financial-records/getAllByUserID/${user.id}`
+          `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/financial-records/getAllByUserID/${user.id}`
         );
 
         if (!response.ok) {
@@ -278,7 +280,7 @@ function FinancialRecordsProvider({ children }: { children: React.ReactNode }) {
 
   const addRecord = async (record: FinancialRecord) => {
     try {
-      const response = await fetch("http://localhost:3001/financial-records", {
+      const response = await fetch(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/financial-records`, {
         method: "POST",
         body: JSON.stringify(record),
         headers: {
@@ -299,13 +301,16 @@ function FinancialRecordsProvider({ children }: { children: React.ReactNode }) {
 
   const updateRecord = async (id: string, newRecord: FinancialRecord) => {
     try {
-      const response = await fetch(`http://localhost:3001/financial-records/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(newRecord),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/financial-records/${id}`,
+        {
+          method: "PUT",
+          body: JSON.stringify(newRecord),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (response.ok) {
         const updated = await response.json();
@@ -322,13 +327,18 @@ function FinancialRecordsProvider({ children }: { children: React.ReactNode }) {
 
   const deleteRecord = async (id: string) => {
     try {
-      const response = await fetch(`http://localhost:3001/financial-records/${id}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/financial-records/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (response.ok) {
         const deleted = await response.json();
-        setRecords((prev) => prev.filter((record) => record._id !== deleted._id));
+        setRecords((prev) =>
+          prev.filter((record) => record._id !== deleted._id)
+        );
       } else {
         console.error("Failed to delete record. Status:", response.status);
       }
@@ -351,7 +361,9 @@ function useFinancialRecords() {
   const context = useContext(FinancialRecordContext);
 
   if (!context) {
-    throw new Error("useFinancialRecords must be used within FinancialRecordsProvider");
+    throw new Error(
+      "useFinancialRecords must be used within FinancialRecordsProvider"
+    );
   }
 
   return context;
