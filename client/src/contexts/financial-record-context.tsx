@@ -238,6 +238,8 @@ export interface FinancialRecord {
 
 interface FinancialRecordsContextType {
   records: FinancialRecord[];
+  loading: boolean;
+  error: string | null;
   addRecord: (record: FinancialRecord) => void;
   updateRecord?: (id: string, newRecord: FinancialRecord) => void;
   deleteRecord?: (id: string) => void;
@@ -251,27 +253,36 @@ const FinancialRecordContext = createContext<
 // 2. Create the provider
 function FinancialRecordsProvider({ children }: { children: React.ReactNode }) {
   const [records, setRecords] = useState<FinancialRecord[]>([]);
-  const { user, isLoaded } = useUser();
+  const [loading, setLoading] = useState(true);
+ const [error, setError] = useState<string | null>(null);
+ const { user, isLoaded } = useUser();
 
   useEffect(() => {
     const fetchRecords = async () => {
       if (!isLoaded || !user) return;
 
       try {
+        setLoading(true);
         const response = await fetch(
           `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/financial-records/getAllByUserID/${user.id}`
         );
 
         if (!response.ok) {
           console.error("Failed to fetch records:", response.status);
+          setError(`Failed to fetch records: ${response.statusText}`);
+          setRecords([]);
           return;
         }
-
+        else {
         const data = await response.json();
-        console.log("Fetched records:", data);
         setRecords(data);
+        console.log("Fetched records:", data);
+      }
       } catch (err) {
-        console.error("Error fetching records:", err);
+         setError("Network error while fetching records");
+         setRecords([]);
+      }finally {
+        setLoading(false);
       }
     };
 
@@ -349,7 +360,7 @@ function FinancialRecordsProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <FinancialRecordContext.Provider
-      value={{ records, addRecord, updateRecord, deleteRecord }}
+      value={{ records, loading, error, addRecord, updateRecord, deleteRecord }}
     >
       {children}
     </FinancialRecordContext.Provider>
