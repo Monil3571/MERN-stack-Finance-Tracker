@@ -13,7 +13,10 @@ export const Dashboard = () => {
   }
 
   if (loading) {
-    return <div>Loading financial records...</div>;
+    return <div>Loading financial records...
+      <p>Please try refreshing the page if nothing happens after a few seconds, the server might be waking up.</p>
+    </div>;
+              
   }
 
   if (error) {
